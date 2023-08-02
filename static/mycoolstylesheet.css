@@ -1,4 +1,5 @@
 body {
+    font-family:sans-serif;
     font-size: 14pt;
     line-height: 1.6;
 }
@@ -24,8 +25,13 @@ button {
 
 /*this is the part where i style the list of turfs*/
 ul.secretly-a-table {
-    display:table;
+    list-style-type:none;
+    padding:0px;
+    margin:0px;
 }
 ul.secretly-a-table li {
-    display:table-row;
+    padding:1px 4px;
+}
+ul.secretly-a-table li:nth-child(odd) {
+    background-color:#f5f5f5;
 }

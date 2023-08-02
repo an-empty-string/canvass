@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Door: {{ door.address }}{% endblock %}
+{% block content %}
+<h1>{{ door.address }}</h1>
+<p><a target="_blank" href="https://maps.google.com/?q={{ (door.address + ' ' + door.city + ' AL') | urlencode }}">Google Map this</a></p>
+<h2>Voters</h2>
+<ul>
+    {% for id in door.voters %}
+    <li>{{ voter_link(id) }}</li>
+    {% endfor %}
+    <br />
+    <li>Or you can <a href="#">log a new contact at this address</a></li>
+</ul>
+<h2>🗒️ Notes</h2>
+{{ render_notes(door) }}
+{{ note_link("door", door._id) }}
+{% endblock %}

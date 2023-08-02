@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Add note: {{ title }}{% endblock %}
+{% block content %}
+<h1>Add note: {{ title }}</h1>
+<form method="POST">
+    <div class="form-field">
+        <label for="note">Note</label>
+        <input name="note" id="note" type="text" autofocus />
+    </div>
+    {% if typ == "voter" %}
+    <div class="form-field">
+        <label for="dnc">Mark as do not contact</label>
+        <input name="dnc" id="dnc" type="checkbox" />
+    </div>
+    {% endif %}
+    <button type="submit">Add note</button>
+<hr />
+return to <a href="{{ link }}">{{ title }}</a>
+{% endblock %}

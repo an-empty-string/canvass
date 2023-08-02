@@ -1,0 +1,70 @@
+{% macro render_notes(x) %}
+{% if x.notes %}
+<ul>
+    {% for note in x.notes %}
+    <li>{{ note.author }}: <em>{{ note.note }}</em></li>
+    {% endfor %}
+</ul>
+{% else %}
+<p>no notes!</p>
+{% endif %}
+{% endmacro %}
+
+{% macro note_link(typ, id) %}
+<a href="{{ url_for('note_obj', typ=typ, id=id) }}">(add new note)</a>
+{% endmacro %}
+
+{% macro turf_link(t) %}
+{% with turf = turfs[t] %}
+<a href="{{ url_for('show_turf', id=t) }}">
+    turf
+</a>
+{% endwith %}
+{% endmacro %}
+
+{% macro door_link(d) %}
+{% with door = doors[d] %}
+<a href="{{ url_for('show_door', id=d) }}">
+    {{ door.address }}
+</a>
+{% endwith %}
+{% endmacro %}
+
+{% macro voter_link(v) %}
+{% with voter = voters[v] %}
+<a href="{{ url_for('show_voter', id=v) }}">
+    {{ voter.firstname }} {{ voter.middlename }} {{ voter.lastname }}
+</a>
+{% endwith %}
+{% endmacro %}
+
+<html>
+    <head>
+        <title>
+            {% block title %}tris is a bad developer and forgot to change the page title{% endblock %}
+        </title>
+<style type="text/css">
+body {
+    font-size: 14pt;
+    line-height: 1.6;
+}
+div.form-field {
+    margin-bottom: 1em;
+}
+
+div.form-field > input[type="text"] {
+    width: 100%;
+    font-size: 14pt;
+}
+
+button {
+    font-size: 150%;
+    width: 100%;
+}
+</style>
+    </head>
+    <body>
+        {% block content %}
+        {% endblock %}
+    </body>
+</html>

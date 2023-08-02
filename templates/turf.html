@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Turf: {{ turf.desc }}{% endblock %}
+{% block content %}
+<h1>{{ turf.desc }}</h1>
+<h2>🛢️ Doors</h2>
+<ul>
+    {% for door in turf.doors %}
+    <li>{{ door_link(door) }}</li>
+    {% endfor %}
+</ul>
+<h2>Notes</h2>
+{{ render_notes(turf) }}
+{{ note_link("turf", turf._id) }}
+{% endblock %}

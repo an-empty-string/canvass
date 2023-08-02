@@ -89,6 +89,7 @@ def note_obj(typ, id):
             0,
             {
                 "ts": datetime.datetime.now().strftime("%b %d %I:%M%P"),
+                "system": False,
                 "author": g.canvasser,
                 "note": request.form.get("note"),
                 "dnc": True if request.form.get("dnc") else False,
@@ -107,6 +108,38 @@ def edit_voter(id):
             "edit_voter.html",
             voter=voter,
         )
+
+    elif request.method == "POST":
+        diffs = []
+        for (
+            field
+        ) in "activeinactive firstname middlename lastname city cellphone landlinephone gender race birthdate".split():
+            new = request.form.get(field)
+            if voter[field] != new:
+                diffs.append((field, voter[field], new))
+                voter[field] = new
+
+        if diffs:
+            rdiffs = {}
+            text = []
+            for field, old, new in diffs:
+                rdiffs[field] = [old, new]
+                text.append(f"changed {field} from {old!r} to {new!r}.")
+
+            voter["notes"].insert(
+                0,
+                {
+                    "ts": datetime.datetime.now().strftime("%b %d %I:%M%P"),
+                    "author": g.canvasser,
+                    "system": True,
+                    "note": " ".join(text),
+                    "diffs": rdiffs,
+                    "dnc": False,
+                },
+            )
+            save_data()
+
+    return redirect(url_for(f"show_voter", id=id))
 
 
 if __name__ == "__main__":

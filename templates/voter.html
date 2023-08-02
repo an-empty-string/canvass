@@ -6,8 +6,14 @@
     !!! do not contact !!!
 </div>
 {% endif %}
+<nav>
+    <ol>
+        <li>{{ turf_link(doors[voter.door_id].turf_id) }}</li>
+        <li>{{ door_link(voter.door_id) }}</li>
+    </ol>
+</nav>
 <h1>{{ voter.firstname }} {{ voter.middlename }} {{ voter.lastname }}</h1>
-<span>
+<div>
         {% if voter.activeinactive == "A" %}
         Active voter registration :D
         {% elif voter.activeinactive == "I" %}
@@ -15,11 +21,10 @@
         {% else %}
         Unknown voter registration status &mdash; have them register to vote?
         {% endif %}
-</span>
+</div>
+<a href="{{ url_for('edit_voter', id=voter._id) }}"><button>edit this voter</button></a>
 <h2>🗒️ Notes</h2>
 {{ render_notes(voter) }}
 {{ note_link("voter", voter._id) }}
 <hr />
-<p>return to {{ door_link(voter.door_id) }}</p>
-<p>return to {{ turf_link(doors[voter.door_id].turf_id) }}</p>
 {% endblock %}

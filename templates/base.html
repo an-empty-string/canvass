@@ -14,7 +14,7 @@
 {% endmacro %}
 
 {% macro note_link(typ, id) %}
-<a href="{{ url_for('note_obj', typ=typ, id=id) }}">(add new note)</a>
+<a href="{{ url_for('note_obj', typ=typ, id=id) }}"><button>add new note</button></a>
 {% endmacro %}
 
 {% macro turf_link(t) %}

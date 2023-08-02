@@ -1,6 +1,8 @@
+import datetime
 import json
+import os
 
-from flask import Flask, g, render_template, request, url_for
+from flask import Flask, g, redirect, render_template, request, url_for
 
 app = Flask(__name__)
 
@@ -8,9 +10,22 @@ with open("database.json") as f:
     data = json.load(f)
 
 
+def save_data():
+    with open("database-new.json", "w") as f:
+        json.dump(data, f)
+
+    ts = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+    os.rename("database.json", f"database-{ts}.json")
+    os.rename("database-new.json", f"database.json")
+
+
+@app.before_request
+def before_request():
+    g.canvasser = "tris emmy wilson"
+
+
 @app.context_processor
 def inject_data():
-    g.canvasser = "tris emmy wilson"
     return data
 
 
@@ -57,7 +72,15 @@ def note_obj(typ, id):
         )
 
     elif request.method == "POST":
-        pass
+        obj["notes"].append(
+            {
+                "author": g.canvasser,
+                "note": request.form.get("note"),
+                "dnc": True if request.form.get("dnc") else False,
+            }
+        )
+        save_data()
+        return redirect(url_for(f"show_{typ}", id=id))
 
 
 if __name__ == "__main__":

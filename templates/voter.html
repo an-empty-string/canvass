@@ -1,6 +1,11 @@
 {% extends "base.html" %}
 {% block title %}Voter: {{ voter.firstname }} {{ voter.middlename }} {{ voter.lastname }}{% endblock %}
 {% block content %}
+{% if dnc %}
+<div class="big important">
+    !!! do not contact !!!
+</div>
+{% endif %}
 <h1>{{ voter.firstname }} {{ voter.middlename }} {{ voter.lastname }}</h1>
 <span>
         {% if voter.activeinactive == "A" %}

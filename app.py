@@ -29,6 +29,19 @@ def inject_data():
     return data
 
 
+@app.context_processor
+def inject_data_2():
+    return {"is_dnc": is_dnc}
+
+
+def is_dnc(v):
+    for note in v["notes"]:
+        if note["dnc"]:
+            return True
+
+    return False
+
+
 @app.route("/turf/<int:id>/")
 def show_turf(id):
     turf = data["turfs"][id]
@@ -44,7 +57,7 @@ def show_door(id):
 @app.route("/voter/<int:id>/")
 def show_voter(id):
     voter = data["voters"][id]
-    return render_template("voter.html", voter=voter)
+    return render_template("voter.html", voter=voter, dnc=is_dnc(voter))
 
 
 def thing_title(obj, id):
@@ -72,15 +85,28 @@ def note_obj(typ, id):
         )
 
     elif request.method == "POST":
-        obj["notes"].append(
+        obj["notes"].insert(
+            0,
             {
+                "ts": datetime.datetime.now().strftime("%b %d %I:%M%P"),
                 "author": g.canvasser,
                 "note": request.form.get("note"),
                 "dnc": True if request.form.get("dnc") else False,
-            }
+            },
         )
         save_data()
         return redirect(url_for(f"show_{typ}", id=id))
+
+
+@app.route("/voter/<int:id>/edit/", methods=["GET", "POST"])
+def edit_voter(id):
+    voter = data["voters"][id]
+
+    if request.method == "GET":
+        return render_template(
+            "edit_voter.html",
+            voter=voter,
+        )
 
 
 if __name__ == "__main__":

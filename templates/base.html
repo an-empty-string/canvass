@@ -2,7 +2,10 @@
 {% if x.notes %}
 <ul>
     {% for note in x.notes %}
-    <li>{{ note.author }}: <em>{{ note.note }}</em></li>
+    <li>
+        {{ note.author }}, {{ note.ts }}: <em>{{ note.note }}</em>
+        {% if note.dnc %}<span class="important">(marked do not contact)</span>{% endif %}
+    </li>
     {% endfor %}
 </ul>
 {% else %}
@@ -34,6 +37,7 @@
 {% with voter = voters[v] %}
 <a href="{{ url_for('show_voter', id=v) }}">
     {{ voter.firstname }} {{ voter.middlename }} {{ voter.lastname }}
+    {% if is_dnc(voter) %}<span class="important">(do not contact)</span>{% endif %}
 </a>
 {% endwith %}
 {% endmacro %}
@@ -56,7 +60,13 @@ div.form-field > input[type="text"] {
     width: 100%;
     font-size: 14pt;
 }
-
+.big {
+    font-size: 200%;
+    border: 1px solid red;
+}
+.important {
+    color: red;
+}
 button {
     font-size: 150%;
     width: 100%;

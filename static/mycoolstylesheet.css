@@ -21,17 +21,61 @@ div.form-field > input[type="text"] {
 button {
     font-size: 150%;
     width: 100%;
+    margin-top:12px;
+}
+
+h1,h2,h3 {
+    line-height:initial;
+    border-top:1px solid black;
+    margin:12px 0px 0px 0px;
+}
+h2,h3 {
+    border-bottom:1px dashed #ccc;
+    margin-top:48px;
+}
+p {
+    margin-top:12px;
+    margin-bottom:6px;
+}
+ul {
+    margin:18px 0px 8px 0px;
+}
+footer {
+    color:#555;
+}
+
+
+h1 a {
+    text-decoration:none;
+}
+h1 a::before {
+    content:'🗺️';
+    margin-right:10px;
 }
 
 /*this is the part where i style the list of turfs*/
 ul.secretly-a-table {
     list-style-type:none;
     padding:0px;
-    margin:0px;
 }
 ul.secretly-a-table li {
     padding:1px 4px;
 }
 ul.secretly-a-table li:nth-child(odd) {
     background-color:#f5f5f5;
+}
+
+ul#door-crumbs {
+    list-style-type:none;
+    padding:0px;
+    font-size:12pt;
+}
+ul#door-crumbs * {
+    text-align:center;
+}
+ul#door-crumbs :first-child  {
+    text-align:left;
+}
+ul#door-crumbs :last-child {
+    text-align:right;
 }

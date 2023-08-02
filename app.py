@@ -1,10 +1,36 @@
 import datetime
 import json
 import os
+import secrets
 
-from flask import Flask, g, redirect, render_template, request, url_for
+from flask import (
+    Flask,
+    abort,
+    g,
+    make_response,
+    redirect,
+    render_template,
+    request,
+    session,
+    url_for,
+)
 
 app = Flask(__name__)
+
+if not os.path.exists("secret_key.txt"):
+    with open("secret_key.txt", "w") as f:
+        f.write(secrets.token_hex())
+
+with open("secret_key.txt") as f:
+    app.secret_key = f.read()
+
+if not os.path.exists("password.txt"):
+    with open("password.txt", "w") as f:
+        f.write("e")
+
+with open("password.txt") as f:
+    password = f.read().strip()
+
 
 with open("database.json") as f:
     data = json.load(f)
@@ -21,7 +47,27 @@ def save_data():
 
 @app.before_request
 def before_request():
-    g.canvasser = "tris emmy wilson"
+    c = session.get("canvasser")
+    if c:
+        g.canvasser = c
+    elif request.endpoint not in {"login", "static"}:
+        if "favicon" in request.url:
+            abort(404)
+
+        session["return_to"] = request.url
+        return redirect(url_for("login"))
+
+
+@app.route("/login/", methods=["GET", "POST"])
+def login():
+    if request.method == "GET":
+        return render_template("login.html")
+
+    if request.form.get("password") != password:
+        return "wrong password, <a href=/login>try again</a>"
+
+    session["canvasser"] = request.form.get("canvasser")
+    return redirect(session.pop("return_to", "/"))
 
 
 @app.context_processor
@@ -64,6 +110,45 @@ def show_door(id):
     return render_template(
         "door.html", door=door, prev_door_id=prev_door_id, next_door_id=next_door_id
     )
+
+
+@app.route("/door/<int:id>/contact/")
+def new_door_contact(id):
+    door = data["doors"][id]
+
+    new_voter = {
+        "statevoterid": "",
+        "activeinactive": "",
+        "firstname": "New",
+        "middlename": "",
+        "lastname": "Voter",
+        "city": door["city"],
+        "cellphone": "",
+        "landlinephone": "",
+        "gender": "",
+        "race": "",
+        "birthdate": "",
+        "regdate": "",
+        "_id": len(data["voters"]),
+        "notes": [
+            {
+                "ts": datetime.datetime.now().strftime("%b %d %I:%M%P"),
+                "author": g.canvasser,
+                "system": True,
+                "note": "created the voter",
+                "dnc": False,
+            },
+        ],
+        "created_by": g.canvasser,
+        "door_id": id,
+        "turf_id": door["turf_id"],
+    }
+    data["voters"].append(new_voter)
+    data["turfs"][new_voter["turf_id"]]["voters"].append(new_voter["_id"])
+    data["doors"][id]["voters"].append(new_voter["_id"])
+    save_data()
+
+    return redirect(url_for("edit_voter", id=new_voter["_id"]))
 
 
 @app.route("/voter/<int:id>/")

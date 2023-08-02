@@ -2,6 +2,7 @@
 {% block title %}Turf: {{ turf.desc }}{% endblock %}
 {% block content %}
 <h1>{{ turf.desc }}</h1>
+<!-- https://www.google.com/maps/dir/{% for door in turf.doors %}{{ doors[door].address + ' ' + doors[door].city + ' AL'|urlencode }}/{% endfor %} -->
 <h2>🛢️ Doors</h2>
 <ul class="secretly-a-table">
     {% for door in turf.doors %}

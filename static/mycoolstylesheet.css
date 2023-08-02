@@ -22,3 +22,10 @@ button {
     width: 100%;
 }
 
+/*this is the part where i style the list of turfs*/
+ul.secretly-a-table {
+    display:table;
+}
+ul.secretly-a-table li {
+    display:table-row;
+}

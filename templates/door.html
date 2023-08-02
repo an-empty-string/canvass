@@ -4,7 +4,7 @@
 <h1>{{ door.address }}</h1>
 <p><a target="_blank" href="https://maps.google.com/?q={{ (door.address + ' ' + door.city + ' AL') | urlencode }}">Google Map this</a></p>
 <h2>Voters</h2>
-<ul>
+<ul class="secretly-a-table">
     {% for id in door.voters %}
     <li>{{ voter_link(id) }}</li>
     {% endfor %}

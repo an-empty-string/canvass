@@ -22,9 +22,7 @@
     <li>{{ voter_link(id) }}</li>
     {% endfor %}
 </ul>
-<p>
-    Or you can <a href="{{ url_for('new_door_contact', id=door._id) }}">log a new contact at this address</a>
-</p>
+<a href="{{ url_for('new_door_contact', id=door._id) }}"><button>add voter</button></a>
 <h2>🗒️ Notes</h2>
 {{ render_notes(door) }}
 {{ note_link("door", door._id) }}

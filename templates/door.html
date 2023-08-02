@@ -1,6 +1,19 @@
 {% extends "base.html" %}
 {% block title %}Door: {{ door.address }}{% endblock %}
 {% block content %}
+<nav>
+    <ul>
+        {% if prev_door_id %}
+        <li>{{ door_link(prev_door_id) }}</li>
+        {% endif %}
+
+        <li>{{ turf_link(door.turf_id) }}</li>
+
+        {% if next_door_id %}
+        <li>{{ door_link(next_door_id) }}</li>
+        {% endif %}
+    </ul>
+</nav>
 <h1>{{ door.address }}</h1>
 <p><a target="_blank" href="https://maps.google.com/?q={{ (door.address + ' ' + door.city + ' AL') | urlencode }}">Google Map this</a></p>
 <h2>Voters</h2>

@@ -51,7 +51,19 @@ def show_turf(id):
 @app.route("/door/<int:id>/")
 def show_door(id):
     door = data["doors"][id]
-    return render_template("door.html", door=door)
+
+    turf_doors = data["turfs"][door["turf_id"]]["doors"]
+    idx = turf_doors.index(id)
+    prev_door_id = next_door_id = None
+
+    if idx > 0:
+        prev_door_id = turf_doors[idx - 1]
+    if idx + 1 < len(turf_doors):
+        next_door_id = turf_doors[idx + 1]
+
+    return render_template(
+        "door.html", door=door, prev_door_id=prev_door_id, next_door_id=next_door_id
+    )
 
 
 @app.route("/voter/<int:id>/")

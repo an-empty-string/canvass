@@ -42,13 +42,21 @@
 {% endwith %}
 {% endmacro %}
 
+{% macro phone_link(x, p) %}
+<a href="{{ tel_uri(p) }}"><button>call {{ reformat_phone(p) }} ({{ x }})</button></a>
+{% endmacro %}
+
+{% macro sms_link(p) %}
+<a href="{{ tel_uri(p, 'sms') }}"><button>text {{ reformat_phone(p) }}</button></a>
+{% endmacro %}
+
 <html>
     <head>
         <title>
             {% block title %}tris is a bad developer and forgot to change the page title{% endblock %}
         </title>
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<link rel="stylesheet" href="/static/mycoolstylesheet.css">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="/static/mycoolstylesheet.css">
     </head>
     <body>
         {% block content %}
@@ -56,6 +64,11 @@
         <hr />
         <footer>
             <span>logged in as {{ g.canvasser }}</span>
+            &middot;
+            <a href="/phonebank_toggle/?return={{ request.url|urlencode }}">
+                {% if g.phonebank %}disable{% else %}enable{% endif %}
+                phonebank mode!
+            </a>
         </footer>
     </body>
 </html>

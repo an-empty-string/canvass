@@ -47,6 +47,10 @@ def save_data():
 
 @app.before_request
 def before_request():
+    g.phonebank = False
+    if session.get("phonebank"):
+        g.phonebank = True
+
     c = session.get("canvasser")
     if c:
         g.canvasser = c
@@ -77,7 +81,7 @@ def inject_data():
 
 @app.context_processor
 def inject_data_2():
-    return {"is_dnc": is_dnc}
+    return {"is_dnc": is_dnc, "reformat_phone": reformat_phone, "tel_uri": tel_uri}
 
 
 def is_dnc(v):
@@ -88,10 +92,49 @@ def is_dnc(v):
     return False
 
 
+def reformat_phone(k):
+    k = "".join([i for i in k if i.isnumeric()])
+    return f"({k[:3]}) {k[3:6]}-{k[6:]}"
+
+
+def tel_uri(k, tel="tel"):
+    k = "".join([i for i in k if i.isnumeric()])
+    return f"{tel}:+1{k[:10]}"
+
+
+@app.route("/")
+def index():
+    return render_template("index.html")
+
+
+@app.route("/phonebank/")
+def phonebank_index():
+    return render_template("index.html")
+
+
+@app.route("/phonebank_toggle/")
+def phonebank_toggle():
+    if "phonebank" in session:
+        del session["phonebank"]
+    else:
+        session["phonebank"] = 1
+    return redirect(request.args.get("return"))
+
+
 @app.route("/turf/<int:id>/")
 def show_turf(id):
     turf = data["turfs"][id]
-    return render_template("turf.html", turf=turf)
+
+    phone_key = turf.get("phone_key")
+
+    if not phone_key:
+        return render_template("turf.html", turf=turf)
+
+    voters = [data["voters"][i] for i in turf["voters"]]
+    # voters = [v for v in voters if phone_key in v and v[phone_key]]
+    # voters.sort(key=lambda v: reformat_phone(v[phone_key]))
+
+    return render_template("phonebank_turf.html", turf=turf, tvoters=voters)
 
 
 @app.route("/door/<int:id>/")
@@ -154,7 +197,24 @@ def new_door_contact(id):
 @app.route("/voter/<int:id>/")
 def show_voter(id):
     voter = data["voters"][id]
-    return render_template("voter.html", voter=voter, dnc=is_dnc(voter))
+
+    prev_voter_id = next_voter_id = None
+    if g.phonebank:
+        turf_voters = data["turfs"][voter["phonebank_turf_id"]]["voters"]
+        idx = turf_voters.index(id)
+        if idx > 0:
+            prev_voter_id = turf_voters[idx - 1]
+        if idx + 1 < len(turf_voters):
+            next_voter_id = turf_voters[idx + 1]
+
+    return render_template(
+        "voter.html",
+        voter=voter,
+        dnc=is_dnc(voter),
+        phonebank=True,
+        prev_voter_id=prev_voter_id,
+        next_voter_id=next_voter_id,
+    )
 
 
 def thing_title(obj, id):
@@ -210,7 +270,7 @@ def edit_voter(id):
         diffs = []
         for (
             field
-        ) in "activeinactive firstname middlename lastname city cellphone landlinephone gender race birthdate".split():
+        ) in "activeinactive firstname middlename lastname city cellphone landlinephone bestphone gender race birthdate".split():
             new = request.form.get(field)
             if voter[field] != new:
                 diffs.append((field, voter[field], new))
@@ -240,4 +300,4 @@ def edit_voter(id):
 
 
 if __name__ == "__main__":
-    app.run(port=3030, debug=True)
+    app.run(host="0.0.0.0", port=3030, debug=True)

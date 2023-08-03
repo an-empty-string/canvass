@@ -12,7 +12,12 @@ def make_door_key(v):
     return (v["housenumber"], v["streetname"], v["streettype"], v["streetquad"])
 
 
-voter_fields = "statevoterid activeinactive firstname middlename lastname city cellphone landlinephone gender race birthdate regdate".split()
+def reformat_phone(k):
+    k = "".join([i for i in k if i.isnumeric()])
+    return f"({k[:3]}) {k[3:6]}-{k[6:]}"
+
+
+voter_fields = "statevoterid activeinactive firstname middlename lastname city cellphone landlinephone gender race birthdate regdate phonebankturf".split()
 
 
 def groupby(xs, k):
@@ -76,13 +81,40 @@ def reorder_doors(turf):
     turf["doors"] = result_ids
 
 
+all_turfs = {}
+
+
+def get_turf_id(turf_desc):
+    orig_turf_desc = turf_desc
+
+    if turf_desc not in all_turfs:
+        phone_key = ""
+
+        if turf_desc.startswith("PHONEBANK: "):
+            turf_desc = turf_desc[len("PHONEBANK: ") :]
+            phone_key = "bestphone"
+
+        elif turf_desc.startswith("TEXTBANK: "):
+            turf_desc = turf_desc[len("TEXTBANK: ") :]
+
+            # this is a bit goofy. by definition, bestphone is going to be mobile
+            # EXCEPT if it's edited!! which we allow!!
+            phone_key = "mobilephone"
+
+        turf = {
+            "desc": turf_desc,
+            "phone_key": phone_key,
+            "doors": [],
+            "voters": [],
+        }
+        turf_id = add("turfs", turf)
+        all_turfs[orig_turf_desc] = turf, turf_id
+
+    return all_turfs[orig_turf_desc]
+
+
 for turf_desc, turf_voters in groupby(voters, operator.itemgetter("turfdesc")):
-    turf = {
-        "desc": turf_desc,
-        "doors": [],
-        "voters": [],
-    }
-    turf_id = add("turfs", turf)
+    turf, turf_id = get_turf_id(turf_desc)
 
     for door_key, door_voters in itertools.groupby(
         sorted(
@@ -120,9 +152,37 @@ for turf_desc, turf_voters in groupby(voters, operator.itemgetter("turfdesc")):
             voter["door_id"] = door_id
             voter["turf_id"] = turf_id
 
+            if voter["phonebankturf"]:
+                phonebank_turf, phonebank_turf_id = get_turf_id(voter["phonebankturf"])
+                voter["phonebank_turf_id"] = phonebank_turf_id
+                phonebank_turf["voters"].append(voter_id)
+
+            voter["bestphone"] = None
+
+            if voter["landlinephone"]:
+                voter["bestphone"] = voter["landlinephone"]
+
+            if voter["cellphone"]:
+                voter["bestphone"] = voter["cellphone"]
+
             turf["voters"].append(voter_id)
             door["voters"].append(voter_id)
 
     reorder_doors(turf)
+
+
+def reorder_voters(turf):
+    phone_key = turf["phone_key"]
+    voters = [data["voters"][i] for i in turf["voters"]]
+    voters = [v for v in voters if phone_key in v and v[phone_key]]
+    voters.sort(key=lambda v: reformat_phone(v[phone_key]))
+    turf["voters"] = [v["_id"] for v in voters]
+
+
+for turf in data["turfs"]:
+    if not turf["phone_key"]:
+        continue
+
+    reorder_voters(turf)
 
 print(json.dumps(data))

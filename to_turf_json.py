@@ -67,18 +67,28 @@ def score_door(door_id, from_door_id):
 
 
 def reorder_doors(turf):
+    routes = []
+
     door_ids = turf["doors"]
+    for start_id in door_ids:
+        q = door_ids.copy()
 
-    q = door_ids.copy()
-    result_ids = [q.pop(0)]
+        result_ids = [start_id]
+        q.remove(start_id)
 
-    while q:
-        cur = result_ids[-1]
-        n = list(sorted(q, key=lambda k: score_door(k, cur)))[0]
-        q.remove(n)
-        result_ids.append(n)
+        total_score = 0
+        while q:
+            cur = result_ids[-1]
+            n = list(sorted(q, key=lambda k: score_door(k, cur)))[0]
+            q.remove(n)
+            result_ids.append(n)
 
-    turf["doors"] = result_ids
+            total_score += score_door(n, cur)
+
+        routes.append((total_score, start_id, result_ids))
+
+    routes.sort()
+    turf["doors"] = routes[0][2]
 
 
 all_turfs = {}

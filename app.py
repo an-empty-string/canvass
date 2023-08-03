@@ -199,7 +199,7 @@ def show_voter(id):
     voter = data["voters"][id]
 
     prev_voter_id = next_voter_id = None
-    if g.phonebank:
+    if g.phonebank and "phonebank_turf_id" in voter:
         turf_voters = data["turfs"][voter["phonebank_turf_id"]]["voters"]
         idx = turf_voters.index(id)
         if idx > 0:

@@ -9,6 +9,32 @@
     </div>
     {% if typ == "voter" %}
     <div class="form-field">
+        <select id="quicknote">
+            <option value="i">[Add a quick note...]</option>
+        </select>
+        <script>
+            addEventListener("DOMContentLoaded", async function() {
+                const rdrQuickNotes = await fetch('/static/quicknotes.json')
+                const rdQuickNotes = await rdrQuickNotes.json();
+                let sel = document.getElementById("quicknote");
+                for ( let note of rdQuickNotes ) {
+                    let opt = document.createElement("option");
+                    opt.innerHTML = note;
+                    opt.value = note;
+                    sel.appendChild(opt);
+                }
+                sel.addEventListener("change", function() {
+                    if ( document.getElementById("note").value != "" ) {
+                        document.getElementById("note").value += "; ";
+                    }
+                    document.getElementById("note").value += document.getElementById("quicknote").value;
+                    //document.getElementsByTagName("form")[0].submit();
+                    document.getElementById("quicknote").value = "i";
+                });
+            });
+        </script>
+    </div>
+    <div class="form-field">
         <label for="dnc">Mark as do not contact</label>
         <input name="dnc" id="dnc" type="checkbox" />
     </div>

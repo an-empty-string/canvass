@@ -10,25 +10,60 @@
     {% if typ == "voter" %}
     <div class="form-field">
         <select id="quicknote">
-            <option value="i">[Add a quick note...]</option>
+            <option value="i">[Add a quick note]</option>
+            <option value="save">[Save the text I typed as a quick note]</option>
         </select>
         <script>
             addEventListener("DOMContentLoaded", async function() {
                 const rdrQuickNotes = await fetch('/static/quicknotes.json')
                 const rdQuickNotes = await rdrQuickNotes.json();
+                const lsrQuickNotes = localStorage.getItem("myquicknotes");
+
+                let allQuickNotes;
+                let lsQuickNotes = [];
+                if ( lsrQuickNotes != null ) {
+                    console.log(lsrQuickNotes);
+                    lsQuickNotes = JSON.parse(lsrQuickNotes);
+                    console.log(lsQuickNotes);
+
+                    allQuickNotes = rdQuickNotes;
+                    for ( let mqn of lsQuickNotes ) {
+                        allQuickNotes.push(mqn);
+                    }
+                } else {
+                    allQuickNotes = rdQuickNotes;
+                }
+                console.log(allQuickNotes);
+
                 let sel = document.getElementById("quicknote");
-                for ( let note of rdQuickNotes ) {
+                for ( let note of allQuickNotes ) {
                     let opt = document.createElement("option");
                     opt.innerHTML = note;
                     opt.value = note;
                     sel.appendChild(opt);
                 }
                 sel.addEventListener("change", function() {
-                    if ( document.getElementById("note").value != "" ) {
-                        document.getElementById("note").value += "; ";
+                    if ( document.getElementById("quicknote").value == "save" ) {
+                        //save it
+                        let note = document.getElementById("note").value;
+
+                        lsQuickNotes.push(note);
+                        console.log(lsQuickNotes);
+                        localStorage.setItem("myquicknotes", JSON.stringify(lsQuickNotes));
+
+                        let sel = document.getElementById("quicknote");
+                        let opt = document.createElement("option");
+                        opt.innerHTML = note;
+                        opt.value = note;
+                        sel.appendChild(opt);
+                    } else {
+                        //do it
+                        if ( document.getElementById("note").value != "" ) {
+                            document.getElementById("note").value += "; ";
+                        }
+                        document.getElementById("note").value += document.getElementById("quicknote").value;
+                        //document.getElementsByTagName("form")[0].submit();
                     }
-                    document.getElementById("note").value += document.getElementById("quicknote").value;
-                    //document.getElementsByTagName("form")[0].submit();
                     document.getElementById("quicknote").value = "i";
                 });
             });

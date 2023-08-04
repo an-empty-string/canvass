@@ -6,7 +6,8 @@
 <ul class="secretly-a-table">
     {% for voter in tvoters %}
     <li>
-        {{ reformat_phone(voter[turf.phone_key]) }} &mdash; {{ voter_link(voter._id) }}
+        <span class="phone">{{ reformat_phone(voter[turf.phone_key]) }}</span>
+        <span class="voter">{{ voter_link(voter._id) }}</span>
     </li>
     {% endfor %}
 </ul>
